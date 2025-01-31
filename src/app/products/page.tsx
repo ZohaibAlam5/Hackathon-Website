@@ -16,19 +16,25 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 
+type Product = {
+  _id: string;
+  ProductCategory: string;
+  ProductCategoryImage: string;
+};
+
 const builder = imageUrlBuilder(client);
 
-function urlFor(source: any) {
+function urlFor(source: string) {
   return builder.image(source);
 }
 
-async function getData() {
+async function getData(): Promise<Product[]> {
   const query = `*[_type == "Products"]{
     _id,
     ProductCategory,
     ProductCategoryImage
   }`;
-  const data = await client.fetch(query);
+  const data: Product[] = await client.fetch(query);
   return data;
 }
 
@@ -50,7 +56,7 @@ export default async function ProductGrid() {
           {data.length} Product Categories
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {data.map((val: any) => (
+          {data.map((val: Product) => (
             <Link
               key={val._id}
               href="/shop"
@@ -77,25 +83,25 @@ export default async function ProductGrid() {
         </div>
       </div>
       <Pagination>
-  <PaginationContent>
-    <PaginationItem>
-      <PaginationPrevious href="/" />
-    </PaginationItem>
-    <PaginationItem>
-      <PaginationLink href="/">1</PaginationLink>
-      <PaginationLink href="/products">2</PaginationLink>
-      <PaginationLink href="/blog">3</PaginationLink>
-       <PaginationLink href="/contact">4</PaginationLink>
-    </PaginationItem>
-    <PaginationItem>
-      <PaginationEllipsis />
-    </PaginationItem>
-    <PaginationItem>
-      <PaginationNext href="/blog" />
-    </PaginationItem>
-  </PaginationContent>
-</Pagination>
-      <Bottom1/>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious href="/" />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink href="/">1</PaginationLink>
+            <PaginationLink href="/products">2</PaginationLink>
+            <PaginationLink href="/blog">3</PaginationLink>
+            <PaginationLink href="/contact">4</PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationEllipsis />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext href="/blog" />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+      <Bottom1 />
       <Foot />
     </div>
   );

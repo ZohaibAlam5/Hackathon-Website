@@ -10,8 +10,20 @@ import Bottom1 from "../Components/component3";
 import { client } from "@/sanity/lib/client";
 import Heading from "../Components/component4";
 
+// Define the structure of a product
+interface Product {
+  ProductID: string;
+  ProductName: string;
+  imageUrl: string;
+  ProductPrice: number;
+  ProductDescription: string;
+  ProductDiscount?: number;
+  ProductBrand: string;
+  ProductCategory: string;
+}
+
 // Fetch products from Sanity
-async function fetchShopProducts() {
+async function fetchShopProducts(): Promise<Product[]> {
   const query = `*[_type == 'Shop']{
     ProductID,
     ProductName,
@@ -29,8 +41,8 @@ export default function Shop() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search")?.toLowerCase() || "";
 
-  const [products, setProducts] = useState<any[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedPrice, setSelectedPrice] = useState<string>("");
@@ -106,7 +118,7 @@ export default function Shop() {
   return (
     <div>
       <Header />
-      <Heading name="Shop"/>
+      <Heading name="Shop" />
 
       <div className="flex flex-col md:flex-row container mx-auto px-4 py-8">
         {/* Left Sidebar */}

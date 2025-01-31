@@ -24,6 +24,14 @@ interface Params {
   item?: number;
 }
 
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string | null;
+}
+
 export default function Home(props: { params: Promise<Params> }) {
   const [params, setParams] = useState<Params>({});
   const [product, setProduct] = useState<Product | null>(null);
@@ -59,10 +67,10 @@ export default function Home(props: { params: Promise<Params> }) {
   // Add product to cart and persist in localStorage
   const addToCart = (product: Product) => {
     const storedCart = localStorage.getItem("cart");
-    const cart = storedCart ? JSON.parse(storedCart) : [];
+    const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
   
     // Check if the product already exists in the cart
-    const existingProduct = cart.find((item: any) => item.id === product.ProductID);
+    const existingProduct = cart.find((item: CartItem) => item.id === product.ProductID);
     if (existingProduct) {
       existingProduct.quantity += 1; // Increment quantity if it exists
     } else {
