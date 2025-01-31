@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -37,7 +37,8 @@ async function fetchShopProducts(): Promise<Product[]> {
   return await client.fetch(query);
 }
 
-export default function Shop() {
+// Main Shop Component
+function ShopContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search")?.toLowerCase() || "";
 
@@ -223,5 +224,14 @@ export default function Shop() {
       <Bottom1 />
       <Foot />
     </div>
+  );
+}
+
+// Export the Shop component wrapped in Suspense
+export default function Shop() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ShopContent />
+    </Suspense>
   );
 }
