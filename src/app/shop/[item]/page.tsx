@@ -94,7 +94,7 @@ export default function Home(props: { params: Promise<Params> }) {
   
     // Save updated cart back to localStorage
     localStorage.setItem("cart", JSON.stringify(cart));
-    alert(`${product.ProductName} added to wishlist!`);
+    alert(`${product.ProductName} added to Cart!`);
   };
 
     // Add product to Wishlist and persist in localStorage
