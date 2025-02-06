@@ -32,6 +32,14 @@ interface CartItem {
   image: string | null;
 }
 
+interface WishlistItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string | null;
+}
+
 export default function Home(props: { params: Promise<Params> }) {
   const [params, setParams] = useState<Params>({});
   const [product, setProduct] = useState<Product | null>(null);
@@ -86,8 +94,33 @@ export default function Home(props: { params: Promise<Params> }) {
   
     // Save updated cart back to localStorage
     localStorage.setItem("cart", JSON.stringify(cart));
-    alert(`${product.ProductName} added to cart!`);
+    alert(`${product.ProductName} added to wishlist!`);
   };
+
+    // Add product to Wishlist and persist in localStorage
+    const addToWishlist = (product: Product) => {
+      const storedWishlist = localStorage.getItem("wishlist");
+      const wishlist: WishlistItem[] = storedWishlist ? JSON.parse(storedWishlist) : [];
+    
+      // Check if the product already exists in the Wishlist
+      const existingProduct = wishlist.find((item: WishlistItem) => item.id === product.ProductID);
+      if (existingProduct) {
+        existingProduct.quantity += 1; // Increment quantity if it exists
+      } else {
+        // Add new product with all relevant details
+        wishlist.push({
+          id: product.ProductID,
+          name: product.ProductName,
+          price: product.ProductPrice - product.ProductDiscount,
+          quantity: 1,
+          image: product.ProductImage ? urlFor(product.ProductImage.asset).url() : null, // Save image URL
+        });
+      }
+    
+      // Save updated wishlist back to localStorage
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      alert(`${product.ProductName} added to wishlist!`);
+    };
   
 
   const selectedItem = product;
@@ -126,6 +159,12 @@ export default function Home(props: { params: Promise<Params> }) {
                  className="bg-pink-500 text-white py-2 px-6 rounded-full mt-4 hover:bg-pink-600"
                     onClick={() => addToCart(selectedItem)}>
                   Add to Cart
+                 </button>
+                 <br />
+                 <button
+                 className="bg-pink-500 text-white py-2 px-6 rounded-full mt-4 hover:bg-pink-600"
+                    onClick={() => addToWishlist(selectedItem)}>
+                  Add to Wishlist
                  </button>
               </div>
             </div>

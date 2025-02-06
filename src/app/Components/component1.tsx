@@ -36,7 +36,9 @@ export default function Header() {
           <Link href="/login" className="hover:text-gray-200">
             Login
           </Link>
-          <button className="hover:text-gray-200">Wishlist</button>
+          <Link href="/wishlist" className="hover:text-gray-200">
+            Wishlist
+          </Link>
         </div>
       </div>
 
