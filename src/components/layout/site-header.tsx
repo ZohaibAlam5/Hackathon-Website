@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, m, useScroll, useTransform } from "framer-motion";
 import {
+  ArrowRight,
   Heart,
+  Loader2,
   LogOut,
   Menu,
   Search,
@@ -19,6 +21,8 @@ import { useWishlist } from "@/lib/wishlist-store";
 import { signOut, useSession } from "@/lib/auth-client";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
+import { client as sanityClient } from "@/sanity/lib/client";
+import type { Product } from "@/lib/sanity-queries";
 import logo from "@/app/icon.png";
 
 const NAV = [
@@ -39,7 +43,10 @@ export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedTerm, setDebouncedTerm] = useState("");
   const [accountOpen, setAccountOpen] = useState(false);
+  const [products, setProducts] = useState<Product[] | null>(null);
+  const [productsLoading, setProductsLoading] = useState(false);
   const accountRef = useRef<HTMLDivElement | null>(null);
 
   const cartCount = useCart(cartSelectors.count);
@@ -62,6 +69,52 @@ export function SiteHeader() {
     if (accountOpen) document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [accountOpen]);
+
+  // Debounce input → reduces work while typing
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedTerm(searchTerm.trim()), 120);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
+
+  // Lazy-fetch products the first time the search panel opens
+  useEffect(() => {
+    if (!searchOpen || products !== null || productsLoading) return;
+    setProductsLoading(true);
+    sanityClient
+      .fetch<Product[]>(
+        `*[_type == "Shop"]{
+          _id,
+          ProductID,
+          ProductName,
+          "imageUrl": ProductImage.asset->url,
+          "ProductPrice": coalesce(ProductPrice, "0"),
+          "ProductDiscount": coalesce(ProductDiscount, "0"),
+          "ProductCategory": coalesce(Productcategory, ProductCategory)
+        } | order(_createdAt desc)`,
+      )
+      .then((rows) =>
+        setProducts(
+          rows.map((p) => ({
+            ...p,
+            ProductPrice: Number(p.ProductPrice) || 0,
+            ProductDiscount: Number(p.ProductDiscount) || 0,
+          })),
+        ),
+      )
+      .catch(() => setProducts([]))
+      .finally(() => setProductsLoading(false));
+  }, [searchOpen, products, productsLoading]);
+
+  const searchResults = useMemo(() => {
+    if (!debouncedTerm || !products) return [] as Product[];
+    const q = debouncedTerm.toLowerCase();
+    return products
+      .filter((p) => {
+        const hay = `${p.ProductName} ${p.ProductDescription ?? ""} ${p.ProductCategory ?? ""}`.toLowerCase();
+        return hay.includes(q);
+      })
+      .slice(0, 6);
+  }, [debouncedTerm, products]);
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -246,6 +299,16 @@ export function SiteHeader() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="h-11 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                   />
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      aria-label="Clear search"
+                      onClick={() => setSearchTerm("")}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
                 <button
                   type="submit"
@@ -254,6 +317,81 @@ export function SiteHeader() {
                   Search
                 </button>
               </form>
+
+              {debouncedTerm && (
+                <div className="mt-3 overflow-hidden rounded-2xl border border-border/60 bg-card/60 backdrop-blur">
+                  {productsLoading && products === null ? (
+                    <div className="flex items-center gap-2 px-4 py-6 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading catalog…
+                    </div>
+                  ) : searchResults.length === 0 ? (
+                    <div className="px-4 py-6 text-sm text-muted-foreground">
+                      No products match{" "}
+                      <span className="font-medium text-foreground">
+                        “{debouncedTerm}”
+                      </span>
+                      .
+                    </div>
+                  ) : (
+                    <ul className="divide-y divide-border/60">
+                      {searchResults.map((p) => {
+                        const finalPrice = Math.max(
+                          0,
+                          Number(p.ProductPrice) - Number(p.ProductDiscount ?? 0),
+                        );
+                        return (
+                          <li key={p._id}>
+                            <Link
+                              href={`/shop/${p.ProductID}`}
+                              onClick={() => {
+                                setSearchOpen(false);
+                                setSearchTerm("");
+                              }}
+                              className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-secondary/60"
+                            >
+                              <span className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg border border-border/60 bg-background">
+                                {p.imageUrl ? (
+                                  <Image
+                                    src={p.imageUrl}
+                                    alt={p.ProductName}
+                                    fill
+                                    sizes="48px"
+                                    className="object-contain p-1.5"
+                                  />
+                                ) : null}
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-sm font-medium">
+                                  {p.ProductName}
+                                </span>
+                                {p.ProductCategory && (
+                                  <span className="block truncate text-[11px] uppercase tracking-wider text-muted-foreground">
+                                    {p.ProductCategory}
+                                  </span>
+                                )}
+                              </span>
+                              <span className="flex-shrink-0 text-sm font-semibold text-primary">
+                                ${finalPrice.toFixed(2)}
+                              </span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                      <li>
+                        <button
+                          type="button"
+                          onClick={(e) => submitSearch(e as unknown as React.FormEvent)}
+                          className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-primary transition hover:bg-secondary/60"
+                        >
+                          See all results for “{debouncedTerm}”
+                          <ArrowRight className="h-4 w-4" />
+                        </button>
+                      </li>
+                    </ul>
+                  )}
+                </div>
+              )}
             </div>
           </m.div>
         )}
