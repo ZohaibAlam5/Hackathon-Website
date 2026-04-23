@@ -82,7 +82,7 @@ export function SiteHeader() {
       }}
       className="sticky top-0 z-50 border-b border-transparent transition-colors data-[scrolled=true]:border-border/60"
     >
-      <div className="container-page flex h-16 items-center justify-between gap-4">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-5 sm:gap-4 sm:px-6 lg:px-8">
         <Link href="/" className="group flex items-center gap-2">
           <span className="relative h-10 w-10 overflow-hidden rounded-xl ring-1 ring-border/60 transition group-hover:ring-primary/60 group-hover:shadow-[0_0_24px_-6px_hsl(var(--primary)/0.6)]">
             <Image
