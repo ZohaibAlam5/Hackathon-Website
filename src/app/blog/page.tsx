@@ -1,200 +1,128 @@
-import Header from "../Components/component1";
-import Foot from "../Components/component2";
-import Bottom1 from "../Components/component3";
-import Image from "next/image";
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-  } from "@/components/ui/pagination"
-  
+import Link from "next/link";
+import { Calendar, Clock } from "lucide-react";
+import { PageHero } from "@/components/ui/page-hero";
+import { Reveal, Stagger, staggerItem } from "@/components/motion/reveal";
+import { MotionItem } from "@/components/motion/motion-item";
 
-import blogimg1 from "../images/blog1.jpg"
-import blogimg2 from "../images/blog2.jpg"
-import blogimg3 from "../images/blog3.jpg"
-import Heading from "../Components/component4";
+const POSTS = [
+  {
+    title: "10 design trends shaping 2026 interiors",
+    excerpt:
+      "From quiet luxury to bio-materials, here's what's defining the year's most-loved interiors.",
+    date: "2026-04-12",
+    minutes: 6,
+    tag: "Trends",
+  },
+  {
+    title: "How to mix vintage and modern without it feeling forced",
+    excerpt:
+      "A practical guide to blending eras so the result feels intentional rather than chaotic.",
+    date: "2026-03-28",
+    minutes: 8,
+    tag: "Guides",
+  },
+  {
+    title: "Small space, big personality: studio apartment ideas",
+    excerpt:
+      "Five furniture choices that make a 400-sqft room feel like a designer&apos;s playground.",
+    date: "2026-03-14",
+    minutes: 5,
+    tag: "Inspiration",
+  },
+  {
+    title: "Materials matter: a beginner's guide to upholstery",
+    excerpt:
+      "What boucle, performance velvet, and saddle leather actually mean for your living room.",
+    date: "2026-02-20",
+    minutes: 9,
+    tag: "Guides",
+  },
+];
 
+export default function BlogPage() {
+  const [feature, ...rest] = POSTS;
 
+  return (
+    <>
+      <PageHero
+        eyebrow="Journal"
+        title="Notes from the studio"
+        description="Design ideas, behind-the-scenes craft, and the occasional rant about good chairs."
+      />
 
-export default function Home(){
-    return(
-        <div>
-            <Header/>
-            <div>
-            <Heading name="Blog"/>
-          <div>
-            <div className="container py-10 2xl:px-20 xl:px-10 lg:px-10 sm:px-8 " >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* Main Content */}
-        <div className="lg:col-span-2">
-          {/* Blog Post 1 */}
-          <div className="mb-10">
-            <Image
-              src={blogimg1}
-              alt="Post 1"
-              className="w-full rounded-md"
+      <div className="container-page py-14">
+        <Reveal>
+          <article className="group relative overflow-hidden rounded-3xl border border-border bg-card/40 p-8 transition hover:shadow-[0_30px_80px_-30px_hsl(var(--primary)/0.4)] sm:p-12">
+            <div
+              aria-hidden
+              className="absolute inset-0 -z-10 bg-grid-pattern bg-grid opacity-25 [mask-image:radial-gradient(ellipse_at_top_right,black,transparent_70%)]"
             />
-            <div className="mt-4">
-              <p className="text-pink-500 font-medium text-sm">Self Feature</p>
-              <p className="text-gray-400 text-sm">Aug 28, 2023</p>
-              <h2 className="text-2xl font-bold mt-2 mb-4">
-                Mauris at orci non vulputate diam tincidunt nec.
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Velit
-                facilisis quis auctor pretium ipsum, cursus...
-              </p>
-              <a
+            <div
+              aria-hidden
+              className="absolute -right-24 -top-24 -z-10 h-64 w-64 rounded-full bg-accent/20 blur-3xl"
+            />
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="rounded-full bg-primary/15 px-2.5 py-1 font-semibold uppercase tracking-wider text-primary">
+                {feature.tag}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" />
+                {new Date(feature.date).toLocaleDateString(undefined, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" />
+                {feature.minutes} min read
+              </span>
+            </div>
+            <h2 className="mt-4 max-w-3xl text-balance font-display text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+              {feature.title}
+            </h2>
+            <p className="mt-3 max-w-2xl text-muted-foreground">
+              {feature.excerpt}
+            </p>
+            <Link
+              href="#"
+              className="mt-6 inline-flex items-center text-sm font-medium text-primary hover:underline"
+            >
+              Read article →
+            </Link>
+          </article>
+        </Reveal>
+
+        <Stagger className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {rest.map((p) => (
+            <MotionItem
+              key={p.title}
+              variants={staggerItem}
+              className="group glass overflow-hidden rounded-2xl p-6"
+            >
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 font-semibold uppercase tracking-wider text-primary">
+                  {p.tag}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock className="h-3 w-3" />
+                  {p.minutes} min
+                </span>
+              </div>
+              <h3 className="mt-3 text-lg font-semibold leading-snug transition group-hover:text-primary">
+                {p.title}
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">{p.excerpt}</p>
+              <Link
                 href="#"
-                className="text-blue-500 font-medium hover:underline"
+                className="mt-4 inline-flex text-sm font-medium text-primary hover:underline"
               >
-                Read More
-              </a>
-            </div>
-          </div>
-          {/* Blog Post 2 */}
-          <div className="mb-10">
-            <Image
-              src={blogimg2}
-              alt="Post 2"
-              className="w-full rounded-md"
-            />
-            <div className="mt-4">
-              <p className="text-pink-500 font-medium text-sm">Self Feature</p>
-              <p className="text-gray-400 text-sm">Aug 28, 2023</p>
-              <h2 className="text-2xl font-bold mt-2 mb-4">
-                Aenean vitae in aliquam ultrices lectus. Etiam.
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Velit
-                facilisis quis auctor pretium ipsum, cursus...
-              </p>
-              <a
-                href="#"
-                className="text-blue-500 font-medium hover:underline"
-              >
-                Read More
-              </a>
-            </div>
-          </div>
-          {/* Blog Post 3 */}
-          <div className="mb-10">
-            <Image 
-              src={blogimg3}
-              alt="Post 3"
-              className="w-full rounded-md"
-            />
-            <div className="mt-4">
-              <p className="text-pink-500 font-medium text-sm">Self Feature</p>
-              <p className="text-gray-400 text-sm">Aug 28, 2023</p>
-              <h2 className="text-2xl font-bold mt-2 mb-4">
-                Sit nam congue feugiat nisl, mauris amet nisi.
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Velit
-                facilisis quis auctor pretium ipsum, cursus...
-              </p>
-              <a
-                href="#"
-                className="text-blue-500 font-medium hover:underline"
-              >
-                Read More
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="">
-          {/* Search */}
-          <div className="mb-10">
-            <input
-              type="text"
-              placeholder="Search"
-              className="w-full p-2 border rounded-md"
-            />
-          </div>
-          {/* Categories */}
-          <div className="mb-10">
-            <h3 className="font-bold mb-4">Categories</h3>
-            <ul className="space-y-2">
-              <li className="text-gray-600 hover:text-gray-800 cursor-pointer">
-                Women (10)
-              </li>
-              <li className="text-gray-600 hover:text-gray-800 cursor-pointer">
-                Men (8)
-              </li>
-              <li className="text-gray-600 hover:text-gray-800 cursor-pointer">
-                Nature (15)
-              </li>
-            </ul>
-          </div>
-          {/* Recent Posts */}
-          <div className="mb-10">
-            <h3 className="font-bold mb-4">Recent Posts</h3>
-            <ul className="space-y-2">
-              <li className="text-gray-600 hover:text-gray-800 cursor-pointer">
-                Post Title 1
-              </li>
-              <li className="text-gray-600 hover:text-gray-800 cursor-pointer">
-                Post Title 2
-              </li>
-              <li className="text-gray-600 hover:text-gray-800 cursor-pointer">
-                Post Title 3
-              </li>
-            </ul>
-          </div>
-          {/* Sale Product */}
-          <div className="mb-10">
-            <h3 className="font-bold mb-4">Sale Product</h3>
-            <p className="text-gray-600">Details about sale products go here.</p>
-          </div>
-          {/* Offer Product */}
-          <div className="mb-10">
-            <h3 className="font-bold mb-4">Offer Product</h3>
-            <p className="text-gray-600">Details about offered products go here.</p>
-          </div>
-          {/* Tags */}
-          <div className="">
-            <h3 className="font-bold mb-4">Tags</h3>
-            <div className="flex gap-2 flex-wrap">
-              <span className="bg-gray-200 px-2 py-1 rounded-md">General</span>
-              <span className="bg-gray-200 px-2 py-1 rounded-md">Women</span>
-              <span className="bg-gray-200 px-2 py-1 rounded-md">Men</span>
-            </div>
-          </div>
-        </div>
+                Read more →
+              </Link>
+            </MotionItem>
+          ))}
+        </Stagger>
       </div>
-    </div>
-    </div>
-
-    <Pagination>
-  <PaginationContent>
-    <PaginationItem>
-      <PaginationPrevious href="/products" />
-    </PaginationItem>
-    <PaginationItem>
-      <PaginationLink href="/">1</PaginationLink>
-      <PaginationLink href="/products">2</PaginationLink>
-       <PaginationLink href="/blog">3</PaginationLink>
-       <PaginationLink href="/contact">4</PaginationLink>
-    </PaginationItem>
-    <PaginationItem>
-      <PaginationEllipsis />
-    </PaginationItem>
-    <PaginationItem>
-      <PaginationNext href="contact" />
-    </PaginationItem>
-  </PaginationContent>
-</Pagination>
-           </div>
-          <Bottom1/>
-           <Foot/>
-        </div>
-        
-    )
+    </>
+  );
 }

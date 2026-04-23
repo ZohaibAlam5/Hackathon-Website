@@ -1,184 +1,226 @@
 "use client";
-import Header from "../Components/component1";
-import Foot from "../Components/component2";
-import { useState, useEffect } from "react";
-import Link from "next/link";
+
 import Image from "next/image";
-import Heading from "../Components/component4";
+import Link from "next/link";
+import { AnimatePresence, m } from "framer-motion";
+import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { useCart, cartSelectors } from "@/lib/cart-store";
+import { Button } from "@/components/ui/button";
+import { PageHero } from "@/components/ui/page-hero";
+import { toast } from "@/components/ui/toaster";
 
-interface Product {
-  id: number;
-  name: string;
-  color: string;
-  size: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
+const SHIPPING_FLAT = 9.99;
+const FREE_SHIPPING_OVER = 99;
 
-export default function Home() {
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) {
-      setProducts(JSON.parse(storedCart));
-    }
-  }, []);
-
-  const updateQuantity = (id: number, quantity: number) => {
-    const updatedProducts = products.map((product) =>
-      product.id === id ? { ...product, quantity: quantity || 0 } : product
-    );
-    setProducts(updatedProducts);
-    localStorage.setItem("cart", JSON.stringify(updatedProducts));
-  };
-
-  const removeProduct = (id: number) => {
-    const updatedProducts = products.filter((product) => product.id !== id);
-    setProducts(updatedProducts);
-    localStorage.setItem("cart", JSON.stringify(updatedProducts));
-  };
-
-  const clearCart = () => {
-    setProducts([]);
-    localStorage.removeItem("cart");
-  };
-
-  const subtotal = products.reduce(
-    (acc, product) => acc + (product.price || 0) * (product.quantity || 0),
-    0
-  );
-  const total = subtotal + 40;
+export default function CartPage() {
+  const items = useCart((s) => s.items);
+  const hydrated = useCart((s) => s.hydrated);
+  const setQuantity = useCart((s) => s.setQuantity);
+  const remove = useCart((s) => s.remove);
+  const clear = useCart((s) => s.clear);
+  const subtotal = useCart(cartSelectors.subtotal);
+  const shipping = subtotal === 0
+    ? 0
+    : subtotal >= FREE_SHIPPING_OVER
+    ? 0
+    : SHIPPING_FLAT;
+  const total = subtotal + shipping;
+  const remainingForFreeShip = Math.max(0, FREE_SHIPPING_OVER - subtotal);
 
   return (
-    <div className="text-sm md:text-base">
-      <Header />
-      <Heading name="Cart" />
-      <div className="container mx-auto p-2 md:p-4">
-        <div className="flex flex-col md:flex-row md:space-x-4">
-          <div className="w-full md:w-2/3">
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white table-auto border-collapse text-xs md:text-sm">
-                <thead>
-                  <tr>
-                    <th className="py-1 md:py-2 text-left border-b">Product</th>
-                    <th className="py-1 md:py-2 text-left border-b">Price</th>
-                    <th className="py-1 md:py-2 text-left border-b">Quantity</th>
-                    <th className="py-1 md:py-2 text-left border-b">Total</th>
-                    <th className="py-1 md:py-2 text-left border-b">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map((product) => (
-                    <tr key={product.id} className="border-b">
-                      <td className="py-1 md:py-2">
-                        <div className="flex items-center space-x-2 md:space-x-4">
+    <>
+      <PageHero
+        eyebrow="Your bag"
+        title="Cart"
+        description="Review and tweak before you check out."
+      />
+      <div className="container-page py-10">
+        {!hydrated ? (
+          <div className="grid min-h-[40dvh] place-items-center text-muted-foreground">
+            Loading…
+          </div>
+        ) : items.length === 0 ? (
+          <EmptyCart />
+        ) : (
+          <div className="grid gap-8 lg:grid-cols-[1fr,380px]">
+            <div className="glass rounded-2xl p-2 sm:p-4">
+              <ul>
+                <AnimatePresence>
+                  {items.map((item) => (
+                    <m.li
+                      key={item.id}
+                      layout
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -40, height: 0, padding: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="flex items-center gap-4 border-b border-border/40 p-3 last:border-0 sm:p-4"
+                    >
+                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-border bg-secondary/30 sm:h-24 sm:w-24">
+                        {item.image && (
                           <Image
-                            src={product.image}
-                            alt={product.name}
-                            className="w-12 h-12 md:w-16 md:h-16"
-                            width={83}
-                            height={87}
+                            src={item.image}
+                            alt={item.name}
+                            fill
+                            sizes="96px"
+                            className="object-cover"
                           />
-                          <div>
-                            <div>{product.name}</div>
-                            <div className="text-xs text-gray-500 md:text-sm">
-                              Color: {product.color}
-                            </div>
-                            <div className="text-xs text-gray-500 md:text-sm">
-                              Size: {product.size}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-1 md:py-2">${product.price?.toFixed(2) || "0.00"}</td>
-                      <td className="py-1 md:py-2">
-                        <input
-                          type="number"
-                          value={product.quantity}
-                          onChange={(e) =>
-                            updateQuantity(
-                              product.id,
-                              parseInt(e.target.value) || 0
-                            )
-                          }
-                          className="w-12 p-1 border rounded md:w-16"
-                        />
-                      </td>
-                      <td className="py-1 md:py-2">
-                        ${((product.price || 0) * (product.quantity || 0)).toFixed(2)}
-                      </td>
-                      <td className="py-1 md:py-2">
-                        <button
-                          className="bg-red-500 text-white px-1 py-1 rounded hover:bg-red-600 text-xs md:text-sm md:px-2"
-                          onClick={() => removeProduct(product.id)}
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <Link
+                          href={`/shop/${item.productId}`}
+                          className="line-clamp-2 text-sm font-semibold transition hover:text-primary sm:text-base"
                         >
-                          Remove
+                          {item.name}
+                        </Link>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          ${item.price.toFixed(2)} each
+                        </p>
+                        <div className="mt-3 inline-flex h-9 items-center rounded-full border border-border bg-card/40 px-1.5">
+                          <button
+                            aria-label="Decrease"
+                            onClick={() =>
+                              setQuantity(item.productId, item.quantity - 1)
+                            }
+                            className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground"
+                          >
+                            <Minus className="h-3.5 w-3.5" />
+                          </button>
+                          <span className="w-8 text-center text-sm font-semibold tabular-nums">
+                            {item.quantity}
+                          </span>
+                          <button
+                            aria-label="Increase"
+                            onClick={() =>
+                              setQuantity(item.productId, item.quantity + 1)
+                            }
+                            className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <p className="font-semibold tabular-nums">
+                          ${(item.price * item.quantity).toFixed(2)}
+                        </p>
+                        <button
+                          aria-label="Remove item"
+                          onClick={() => {
+                            remove(item.productId);
+                            toast(`Removed ${item.name}`, "info");
+                          }}
+                          className="grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition hover:bg-destructive/15 hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </button>
-                      </td>
-                    </tr>
+                      </div>
+                    </m.li>
                   ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="flex flex-wrap justify-between mt-2 md:mt-4 gap-2">
-              <button
-                className="bg-pink-500 text-white px-2 py-1 rounded hover:bg-pink-600 text-xs md:text-sm md:px-4"
-                onClick={() => setProducts(products)}
-              >
-                Update Cart
-              </button>
-              <button
-                className="bg-pink-500 text-white px-2 py-1 rounded hover:bg-pink-600 text-xs md:text-sm md:px-4"
-                onClick={clearCart}
-              >
-                Clear Cart
-              </button>
-            </div>
-          </div>
-          <div className="w-full md:w-1/3 mt-2 md:mt-0">
-            <div className="bg-gray-100 p-2 md:p-4 rounded">
-              <h2 className="text-sm md:text-lg font-bold">Cart Totals</h2>
-              <div className="flex justify-between mt-1 md:mt-2">
-                <span>Subtotals:</span>
-                <span>${subtotal.toFixed(2)}</span>
+                </AnimatePresence>
+              </ul>
+              <div className="flex justify-between border-t border-border/40 p-4">
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/shop">Continue shopping</Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    clear();
+                    toast("Cart cleared", "info");
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" /> Clear cart
+                </Button>
               </div>
-              <div className="flex justify-between mt-1 md:mt-2">
-                <span>Totals Including Shipping:</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
-              <Link href="/ordercompleted">
-                <button className="bg-green-500 text-white w-full mt-2 md:mt-4 py-1 md:py-2 rounded hover:bg-green-600 text-xs md:text-sm">
-                  Order now
-                </button>
-              </Link>
             </div>
-            <div className="bg-gray-100 p-2 md:p-4 rounded mt-2 md:mt-4">
-              <h2 className="text-sm md:text-lg font-bold">Calculate Shipping</h2>
-              <input
-                type="text"
-                placeholder="Country"
-                className="w-full p-1 border rounded mb-1 md:mb-2 text-xs md:text-sm"
-              />
-              <input
-                type="text"
-                placeholder="City"
-                className="w-full p-1 border rounded mb-1 md:mb-2 text-xs md:text-sm"
-              />
-              <input
-                type="text"
-                placeholder="Postal Code"
-                className="w-full p-1 border rounded mb-1 md:mb-2 text-xs md:text-sm"
-              />
-              <button className="bg-pink-500 text-white w-full py-1 md:py-2 rounded hover:bg-pink-600 text-xs md:text-sm">
-                Calculate
-              </button>
-            </div>
+
+            <aside className="glass rounded-2xl p-6">
+              <h2 className="font-display text-xl font-bold">Order summary</h2>
+              <dl className="mt-5 space-y-3 text-sm">
+                <Row label="Subtotal" value={`$${subtotal.toFixed(2)}`} />
+                <Row
+                  label="Shipping"
+                  value={shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+                />
+                {remainingForFreeShip > 0 && (
+                  <p className="rounded-xl border border-primary/30 bg-primary/10 p-3 text-xs text-foreground/80">
+                    Add ${remainingForFreeShip.toFixed(2)} more for free shipping.
+                  </p>
+                )}
+                <div className="my-3 h-px bg-border/60" />
+                <Row
+                  label="Total"
+                  value={`$${total.toFixed(2)}`}
+                  emphasis
+                />
+              </dl>
+
+              <Button asChild size="lg" className="mt-6 w-full">
+                <Link href="/checkout">
+                  Checkout
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+
+              <p className="mt-4 text-center text-xs text-muted-foreground">
+                Sign in at checkout to sync your cart across devices.
+              </p>
+            </aside>
           </div>
-        </div>
+        )}
       </div>
-      <Foot />
+    </>
+  );
+}
+
+function Row({
+  label,
+  value,
+  emphasis,
+}: {
+  label: string;
+  value: string;
+  emphasis?: boolean;
+}) {
+  return (
+    <div
+      className={
+        emphasis
+          ? "flex items-baseline justify-between text-base font-bold"
+          : "flex items-baseline justify-between text-muted-foreground"
+      }
+    >
+      <dt>{label}</dt>
+      <dd
+        className={
+          emphasis ? "tabular-nums text-foreground" : "tabular-nums text-foreground"
+        }
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function EmptyCart() {
+  return (
+    <div className="grid place-items-center rounded-3xl border border-dashed border-border/60 bg-card/30 p-16 text-center">
+      <div className="grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-primary/30 to-accent/30">
+        <ShoppingBag className="h-7 w-7 text-foreground" />
+      </div>
+      <h2 className="mt-5 font-display text-2xl font-bold">Your cart is empty</h2>
+      <p className="mt-2 max-w-md text-sm text-muted-foreground">
+        Looks like you haven&apos;t added anything yet. Explore the collection and
+        find pieces that speak to your space.
+      </p>
+      <Button asChild className="mt-6">
+        <Link href="/shop">
+          Browse the shop <ArrowRight className="h-4 w-4" />
+        </Link>
+      </Button>
     </div>
   );
 }

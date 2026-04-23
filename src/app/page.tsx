@@ -1,331 +1,327 @@
-
-import Header from "./Components/component1";
-import Foot from "./Components/component2";
-import Image from "next/image";
-import home1 from "../app/images/home1.png"
-import sofa from "./images/unique feature sofa.png"
-import Bottom1 from "./Components/component3";
 import Link from "next/link";
+import { ArrowRight, ShieldCheck, Truck, Sparkles, Headphones } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Reveal, Stagger, staggerItem } from "@/components/motion/reveal";
+import { ProductCard } from "@/components/product/product-card";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
+  getCategories,
+  getFeaturedProducts,
+  getLatestProducts,
+} from "@/lib/sanity-queries";
+import Image from "next/image";
+import { CategoryTile } from "@/components/sections/category-tile";
+import { HeroParallax } from "@/components/sections/hero-parallax";
+import { MotionItem } from "@/components/motion/motion-item";
 
-export default function Home() {
+export const revalidate = 60;
+
+const FEATURES = [
+  { Icon: Truck, title: "Free Delivery", desc: "On every order over $99" },
+  { Icon: ShieldCheck, title: "Secure Checkout", desc: "Hashed passwords, encrypted in transit" },
+  { Icon: Sparkles, title: "Curated Quality", desc: "Hand-picked from leading designers" },
+  { Icon: Headphones, title: "24/7 Support", desc: "Real humans, anytime" },
+];
+
+export default async function HomePage() {
+  const [featured, latest, categories] = await Promise.all([
+    getFeaturedProducts(4),
+    getLatestProducts(6),
+    getCategories(),
+  ]);
+
+  const heroProduct = featured[0] ?? latest[0];
+
   return (
-<div>
-  
-  <Header/>
-  <div>
-  <div className="bg-white">
-      {/* Hero Section */}
-      <div className="bg-purple-100 flex flex-col md:flex-row items-center justify-between p-8 md:p-16">
-      <div className="flex flex-col items-start md:w-1/2">
-        <div className="flex items-center mb-4">
-          <div className="w-8 h-8 bg-pink-500 rounded-full mr-2"></div>
-          <p className="text-red-500 font-semibold">Best Furniture For Your Castle...</p>
-        </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">New Furniture Collection Trends in 2020</h1>
-        <p className="text-gray-600 mb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Magna in est adipiscing in phasellus non in justo.</p>
-        <Link href="/shop"><button className="bg-pink-500 text-white py-2 px-6 rounded-full hover:">Shop Now</button></Link>
-      </div>
-      <div className="relative md:w-1/2 mt-8 md:mt-0">
-        <Image src={home1} alt="Chair" className="w-60 h-auto" />
-        <div className="absolute top-0 right-0 bg-blue-500 text-white text-lg font-bold p-2 rounded-full transform translate-x-1/2 -translate-y-1/2">
-          50% off
-        </div>
-      </div>
-      </div>
-      {/* Featured Products */}
-      <section className="w-4/5 mx-auto mt-16">
-        <h3 className="text-center text-2xl font-bold mb-6">Featured Products</h3>
-        <Link href="/shop"><div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
-          {/* Product Cards */}
-          {[
-            { id:7, name: "Comfort Chair", price: "$42.00" },
-            { id:8, name: "Comfort Chair", price: "$42.00" },
-            { id:9, name: "Comfort Chair", price: "$42.00" },
-            { id:14, name: "Comfort Chair", price: "$42.00" },
-          ].map((product, index) => (
-            <div
-              key={product.id}
-              className={`relative border rounded-lg p-4 shadow-md ${
-                index === 1 ? "border-2 border-[#FF3E66]" : ""
-              }`}
-            >
-              <Image
-                src={`/chair-${product.id}.png`}
-                alt={product.name}
-                className=" object-cover mb-4"
-                width={200}
-                height={200}
-              /> 
-              <h4 className="text-lg font-semibold">{product.name}</h4>
-              <p className="text-gray-500">{product.price}</p>
-              {index === 1 && (
-                <button className="absolute top-0 right-0 bg-[#FF3E66] text-white px-2 py-1 rounded-bl-lg">
-                  Featured
-                </button>
-              )}
-            </div>
-          ))}
-        </div></Link>
-      </section>
+    <>
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-grid-pattern bg-grid opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]"
+        />
+        <div
+          aria-hidden
+          className="absolute -left-40 top-10 -z-10 h-96 w-96 rounded-full bg-primary/20 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="absolute -right-40 bottom-0 -z-10 h-96 w-96 rounded-full bg-accent/20 blur-3xl"
+        />
 
-      {/* Latest Products */}
-      <section className="w-4/5 mx-auto mt-16">
-        <h3 className="text-center text-2xl font-bold mb-6">Latest Products</h3>
-        <Link href ="/shop"><div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {[
-            { name: "Comfort Handy Craft", price: "$42.00", image: "1" },
-            { name: "Comfort Handy Craft", price: "$42.00", image: "2" },
-            { name: "Comfort Handy Craft", price: "$42.00", image: "3" },
-            { name: "Comfort Handy Craft", price: "$42.00", image: "4" },
-            { name: "Comfort Handy Craft", price: "$42.00", image: "5" },
-            { name: "Comfort Handy Craft", price: "$42.00", image: "6" },
-          ].map((product, index) => (
-            <div
-              key={index}
-              className="border rounded-lg p-4 shadow-md flex flex-col items-center"
-            >
-              <Image
-                src={`/chair-${product.image}.png`}
-                alt={product.name}
-                className="w-32 h-32 object-cover mb-4"
-                height={200}
-                width={200}
-              />
-              <h4 className="text-lg font-semibold text-center">
-                {product.name}
-              </h4>
-              <p className="text-gray-500 text-center">{product.price}</p>
-            </div>
-          ))}
-
-        </div></Link>
-      </section>
-
-      {/* Shapex Offer Section */}
-      <section className="w-4/5 mx-auto mt-16 mb-10">
-  <h3 className="text-center text-2xl font-bold mb-6">What Shapex Offer!</h3>
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 text-center">
-    {["24/7 Support", "Free Delivery", "Easy Returns", "24/7 Support"].map(
-      (offer, index) => (
-        <div key={index} className="p-6 border rounded-lg shadow-md">
-          <h4 className="text-lg font-bold mb-2">{offer}</h4>
-          <p className="text-gray-500 text-sm">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-          </p>
-        </div>
-      )
-    )}
-  </div>
-</section>
-
-    </div>
-    <div className="max-w-[1440px] mx-auto font-sans">
-      {/* Hero Section */}
-      <section className="bg-[#f4f4f9] py-10 px-4">
-        <div className="flex flex-col md:flex-row items-center">
-          <div className="flex-1">
-          <h1 className="text-4xl font-bold text-gray-900 leading-snug mb-4">
-              Vintage Product Of Comfort & Trending Products
-            </h1>
-            <p className="text-gray-700 mb-6">
-              Explore our collection of modern, stylish furniture that blends
-              aesthetics with function.
-            </p>
-            <Link href="/shop"><button className="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-600 transition">
-              Shop Now
-            </button></Link>
-          </div>
-          <div className="flex-1">
-            <Image
-              src={sofa}
-              alt="Hero Chair"
-              className="w-full max-w-sm mx-auto"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Trending Products */}
-      <section className="py-12 px-4">
-        <h2 className="text-3xl font-semibold text-center mb-6">
-          Trending Products
-        </h2>
-       <Link href="/shop"><div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {[
-            { id: 11, name: "Modern Chair", price: "$120", discount: "20%" },
-            { id: 12, name: "Stylish Sofa", price: "$200", discount: "30%" },
-            { id: 13, name: "Classic Stool", price: "$80", discount: "15%" },
-            { id: 10, name: "Elegant Bench", price: "$150", discount: "10%" },
-          ].map((item) => (
-            <div
-              key={item.id}
-              className="p-4 border rounded-lg shadow hover:shadow-lg transition"
-            >
-              <div className="h-40 bg-gray-200 rounded mb-4">
-                <Image
-                src={`/chair-${item.id}.png`}
-                alt={item.name}
-                className="w-32 h-32 object-cover mb-4 mx-20"
-                width={200}
-                height={200}
-              />
-              </div>
-              <h3 className="font-semibold text-lg">{item.name}</h3>
-              <p className="text-gray-600">{item.price}</p>
-              <span className="text-pink-500 text-sm">{item.discount} OFF</span>
-            </div>
-          ))}
-        </div></Link>
-      </section>
-
-      {/* Discount Items */}
-      <section className="bg-gray-100 py-10 px-4">
-        <div className="flex flex-col md:flex-row items-center">
-          <div className="flex-1">
-            <Image
-              src="/chair-18.png"
-              alt="Discount Item"
-              className="w-full max-w-xs mx-auto"
-              width={200}
-              height={200}
-            />
-          </div>
-          <div className="flex-1 text-center md:text-left">
-            <h2 className="text-3xl font-semibold mb-4">
-              20% Discount On All Products
-            </h2>
-            <p className="text-gray-700 mb-6">
-              Limited time offer! Grab our best deals today.
-            </p>
-            <Link href="/shop">
-            <button className="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-600 transition">
-              Shop Now
-            </button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Top Categories */}
-      <section className="py-12 px-4">
-  <h2 className="text-3xl font-semibold text-center mb-6">
-    Top Categories
-  </h2>
-  <Link href="/shop"><div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-    {[
-      { id: 15, name: "chair" },
-      { id: 16, name: "Table" },
-      { id: 17, name: "Bench" },
-      { id: 17, name: "mini chair" },
-    ].map((category, idx) => (
-      <div
-        key={idx}
-        className="p-4 border rounded-full shadow hover:shadow-full transition text-center"
-      >
-        <div className="h-24 bg-white rounded-full mb-2">
-          <Image
-            src={`/chair-${category.id}.png`}
-            alt={category.name}
-            className="mx-auto object-cover mb-4"
-            width={90}
-            height={50} 
-          />
-        </div>
-        <h3 className="font-semibold">{category.name}</h3>
-      </div>
-    ))}
-  </div></Link>
-</section>
-
-
-      {/* Newsletter */}
-      <section className="bg-[#f4f4f9] py-10 px-4 text-center">
-        <h2 className="text-3xl font-semibold mb-4">
-          Get Latest Updates By Subscribe Our Newsletter
-        </h2>
-        <form className="flex justify-center mt-4">
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="w-full max-w-md px-4 py-2 border rounded-l focus:outline-none"
-          />
-          <button
-            type="submit"
-            className="bg-pink-500 text-white px-6 py-2 rounded-r hover:bg-pink-600 transition"
-          >
-            Subscribe
-          </button>
-        </form>
-      </section>
-<br></br>
-      <div><Bottom1/></div>
-
-      {/* Blog Section */}
-      <section className="py-12 px-4">
-        <h2 className="text-3xl font-semibold text-center mb-6">Latest Blog</h2>
-        <Link href="/blog"><div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-          { id: 1, name: "Top Essential Trends 2021"},
-          { id: 2, name: "Top Essential Trends 2021"},
-          { id: 1, name: "Top Essential Trends 2021"},
-          ].map((title, idx) => (
-            <div
-              key={idx}
-              className="p-4 border rounded-lg shadow hover:shadow-lg transition"
-            >
-              <div className=" bg-gray-200 rounded mb-4">
-              <Image
-                src={`/blog${title.id}.png`}
-                alt={title.name}
-                className="object-cover mb-4 "
-                width={500}
-                height={253}
-                />
-              </div>
-              <h3 className="font-semibold">{title.name}</h3>
-              <p className="text-gray-600 text-sm mt-2">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
-                vel mauris quam.
+        <div className="container-page grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
+          <div>
+            <Reveal>
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/40 px-3 py-1 text-xs font-medium uppercase tracking-wider text-primary">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+                New collection · 2026
+              </span>
+            </Reveal>
+            <Reveal delay={0.05}>
+              <h1 className="mt-5 text-balance font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
+                Furniture for the{" "}
+                <span className="neon-text">future you live in.</span>
+              </h1>
+            </Reveal>
+            <Reveal delay={0.15}>
+              <p className="mt-5 max-w-xl text-balance text-base text-muted-foreground sm:text-lg">
+                Bold silhouettes, sustainable materials, and pieces engineered
+                to outlast trends. Discover the collection redefining modern
+                living.
               </p>
-            </div>
-          ))}
-        </div></Link>
-      </section>
-    </div>
-  </div>
-  <div>
-  <Pagination>
-  <PaginationContent>
-    <PaginationItem>
-      <PaginationPrevious href="/" />
-    </PaginationItem>
-    <PaginationItem>
-      <PaginationLink href="/">1</PaginationLink>
-      <PaginationLink href="/products">2</PaginationLink>
-      <PaginationLink href="/blog">3</PaginationLink>
-       <PaginationLink href="/contact">4</PaginationLink>
-    </PaginationItem>
-    <PaginationItem>
-      <PaginationEllipsis />
-    </PaginationItem>
-    <PaginationItem>
-      <PaginationNext href="/products" />
-    </PaginationItem>
-  </PaginationContent>
-</Pagination>
-  </div>
-    <Foot/>
-    </div>
+            </Reveal>
+            <Reveal delay={0.25}>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Button asChild size="lg">
+                  <Link href="/shop">
+                    Shop the collection
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg">
+                  <Link href="/products">Browse categories</Link>
+                </Button>
+              </div>
+            </Reveal>
+            <Reveal delay={0.35}>
+              <dl className="mt-10 grid max-w-md grid-cols-3 gap-6">
+                {[
+                  { k: "120+", v: "Designers" },
+                  { k: "98%", v: "Happy customers" },
+                  { k: "24h", v: "Avg. dispatch" },
+                ].map((s) => (
+                  <div key={s.v}>
+                    <dt className="font-display text-2xl font-bold neon-text">
+                      {s.k}
+                    </dt>
+                    <dd className="text-xs uppercase tracking-wider text-muted-foreground">
+                      {s.v}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </Reveal>
+          </div>
 
+          <Reveal delay={0.2} className="relative">
+            <HeroParallax
+              imageUrl={heroProduct?.imageUrl ?? null}
+              alt={heroProduct?.ProductName ?? "Featured product"}
+              productId={heroProduct?.ProductID}
+              price={
+                heroProduct
+                  ? Math.max(
+                      0,
+                      Number(heroProduct.ProductPrice) -
+                        Number(heroProduct.ProductDiscount ?? 0),
+                    )
+                  : null
+              }
+            />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Featured products */}
+      <section className="border-t border-border/60 py-16 sm:py-20">
+        <div className="container-page">
+          <SectionHeader
+            eyebrow="Hand-picked"
+            title="Featured products"
+            description="Pieces our curators are obsessed with this season."
+            href="/shop"
+          />
+          {featured.length === 0 ? (
+            <EmptyState
+              title="Sanity is connected, but no featured products yet."
+              hint="Mark a product as 'ProductFeatured' in your Sanity Studio to see it here."
+            />
+          ) : (
+            <Stagger className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {featured.map((p, i) => (
+                <MotionItem key={p._id} variants={staggerItem}>
+                  <ProductCard product={p} priority={i < 2} />
+                </MotionItem>
+              ))}
+            </Stagger>
+          )}
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className="border-t border-border/60 py-16 sm:py-20">
+        <div className="container-page">
+          <SectionHeader
+            eyebrow="Browse by"
+            title="Top categories"
+            description="Find your aesthetic across every room."
+            href="/products"
+          />
+          {categories.length === 0 ? (
+            <EmptyState
+              title="No categories yet."
+              hint="Add Products documents (categories) in Sanity Studio."
+            />
+          ) : (
+            <Stagger className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {categories.slice(0, 8).map((c) => (
+                <MotionItem key={c._id} variants={staggerItem}>
+                  <CategoryTile category={c} />
+                </MotionItem>
+              ))}
+            </Stagger>
+          )}
+        </div>
+      </section>
+
+      {/* Promo banner */}
+      <section className="border-t border-border/60 py-16 sm:py-20">
+        <div className="container-page">
+          <Reveal>
+            <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-card/60 to-accent/15 p-8 sm:p-12">
+              <div
+                aria-hidden
+                className="absolute inset-0 bg-grid-pattern bg-grid opacity-20 [mask-image:radial-gradient(ellipse_at_top_right,black,transparent_70%)]"
+              />
+              <div className="relative grid items-center gap-8 md:grid-cols-2">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+                    Limited time
+                  </p>
+                  <h2 className="mt-3 text-balance font-display text-3xl font-bold tracking-tight sm:text-4xl">
+                    20% off the entire collection
+                  </h2>
+                  <p className="mt-3 max-w-lg text-muted-foreground">
+                    Refresh your space with this season&apos;s standouts. No code
+                    needed — discount applied automatically at checkout.
+                  </p>
+                  <div className="mt-6">
+                    <Button asChild size="lg">
+                      <Link href="/shop">
+                        Claim discount
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+                {(featured[1]?.imageUrl || latest[0]?.imageUrl) && (
+                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/60">
+                    <Image
+                      src={(featured[1]?.imageUrl || latest[0]?.imageUrl) as string}
+                      alt="Promo"
+                      fill
+                      sizes="(min-width:768px) 50vw, 100vw"
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Latest products */}
+      <section className="border-t border-border/60 py-16 sm:py-20">
+        <div className="container-page">
+          <SectionHeader
+            eyebrow="Just dropped"
+            title="Latest arrivals"
+            description="Fresh designs added this week."
+            href="/shop"
+          />
+          {latest.length === 0 ? (
+            <EmptyState
+              title="No products in your Sanity dataset yet."
+              hint="Add some Shop documents to get started."
+            />
+          ) : (
+            <Stagger className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {latest.map((p) => (
+                <MotionItem key={p._id} variants={staggerItem}>
+                  <ProductCard product={p} />
+                </MotionItem>
+              ))}
+            </Stagger>
+          )}
+        </div>
+      </section>
+
+      {/* Why Hekto */}
+      <section className="border-t border-border/60 py-16 sm:py-20">
+        <div className="container-page">
+          <SectionHeader
+            eyebrow="Why Hekto"
+            title="Built for the long haul"
+            description="The little things that make every order feel premium."
+          />
+          <Stagger className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {FEATURES.map(({ Icon, title, desc }) => (
+              <MotionItem
+                key={title}
+                variants={staggerItem}
+                className="glass rounded-2xl p-6"
+              >
+                <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary/30 to-accent/30 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-4 font-semibold">{title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
+              </MotionItem>
+            ))}
+          </Stagger>
+        </div>
+      </section>
+    </>
   );
 }
- 
+
+function SectionHeader({
+  eyebrow,
+  title,
+  description,
+  href,
+}: {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  href?: string;
+}) {
+  return (
+    <Reveal>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          {eyebrow && (
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+              {eyebrow}
+            </p>
+          )}
+          <h2 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+            {title}
+          </h2>
+          {description && (
+            <p className="mt-2 max-w-2xl text-muted-foreground">{description}</p>
+          )}
+        </div>
+        {href && (
+          <Link
+            href={href}
+            className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+          >
+            View all <ArrowRight className="h-4 w-4" />
+          </Link>
+        )}
+      </div>
+    </Reveal>
+  );
+}
+
+function EmptyState({ title, hint }: { title: string; hint?: string }) {
+  return (
+    <div className="mt-10 rounded-2xl border border-dashed border-border/60 bg-card/30 p-10 text-center">
+      <p className="font-medium">{title}</p>
+      {hint && (
+        <p className="mt-2 text-sm text-muted-foreground">{hint}</p>
+      )}
+    </div>
+  );
+}

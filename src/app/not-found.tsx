@@ -1,44 +1,42 @@
-
-import Foot from "./Components/component2";
-import Bottom1 from "./Components/component3";
-import Image from "next/image";
 import Link from "next/link";
+import { ArrowLeft, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-import notfound from "../app/images/notfound.jpg"
-import Header from "./Components/component1";
-
-export default function NotFound(){
-   return(
-    <div>
-        <Header/>
-
-        <div className="bg-gray-50">
-             <section className="bg-purple-100 text-center py-10">
-               <h1 className="text-3xl font-bold text-gray-800">404 Page Not Found</h1>
-               <p className="mt-2 text-gray-600"></p>
-            </section>
-           </div>
-    <div className="flex justify-center">
-        <Image
-        src={notfound}
-        alt="OOPS THE PAGE YOU REQUESTED WAS NOT FOUND"
-        className="rounded-md"
-        width={800}
-        height={300}
-        />
-    </div>    
-        <div className="flex justify-center">
-          <Link href="/">
-        <button className="px-6 py-2 text-white bg-pink-500 rounded-md hover:bg-pink-600 transition">
-            Back To Home
-          </button>
-          </Link>
-        </div>  
-    
-        <Bottom1/>
-        <Foot/>
-    
+export default function NotFound() {
+  return (
+    <div className="relative grid min-h-[calc(100dvh-4rem)] place-items-center overflow-hidden py-24">
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-grid-pattern bg-grid opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]"
+      />
+      <div
+        aria-hidden
+        className="absolute left-1/2 top-1/2 -z-10 h-72 w-[40rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-neon-gradient opacity-20 blur-3xl"
+      />
+      <div className="container-page text-center">
+        <p className="font-mono text-sm uppercase tracking-[0.4em] text-primary">
+          Error 404
+        </p>
+        <h1 className="mt-3 font-display text-6xl font-bold tracking-tight sm:text-8xl">
+          <span className="neon-text">Lost in the void</span>
+        </h1>
+        <p className="mx-auto mt-6 max-w-md text-balance text-muted-foreground">
+          The page you&apos;re looking for drifted off the grid. Let&apos;s get
+          you back to something familiar.
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Button asChild>
+            <Link href="/">
+              <Home className="h-4 w-4" /> Back home
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/shop">
+              <ArrowLeft className="h-4 w-4" /> Go shopping
+            </Link>
+          </Button>
+        </div>
+      </div>
     </div>
-   ) 
-
+  );
 }

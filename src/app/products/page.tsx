@@ -1,108 +1,42 @@
-// components/ProductGrid.tsx
-import Link from 'next/link';
-import Header from '../Components/component1';
-import Foot from '../Components/component2';
-import Image from 'next/image';
-import { client } from "@/sanity/lib/client";
-import imageUrlBuilder from '@sanity/image-url';
-import Bottom1 from '../Components/component3';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
+import { getCategories } from "@/lib/sanity-queries";
+import { CategoryTile } from "@/components/sections/category-tile";
+import { PageHero } from "@/components/ui/page-hero";
+import { Reveal, Stagger, staggerItem } from "@/components/motion/reveal";
+import { MotionItem } from "@/components/motion/motion-item";
 
-type Product = {
-  _id: string;
-  ProductCategory: string;
-  ProductCategoryImage: string;
-};
+export const revalidate = 120;
 
-const builder = imageUrlBuilder(client);
-
-function urlFor(source: string) {
-  return builder.image(source);
-}
-
-async function getData(): Promise<Product[]> {
-  const query = `*[_type == "Products"]{
-    _id,
-    ProductCategory,
-    ProductCategoryImage
-  }`;
-  const data: Product[] = await client.fetch(query);
-  return data;
-}
-
-export default async function ProductGrid() {
-  const data = await getData();
+export default async function ProductsPage() {
+  const categories = await getCategories();
 
   return (
-    <div>
-      <Header />
-      <div className="bg-gray-50">
-        <section className="bg-purple-100 text-center py-10">
-          <h1 className="text-3xl font-bold text-gray-800">Products</h1>
-          <p className="mt-2 text-gray-600">Browse our product categories</p>
-        </section>
+    <>
+      <PageHero
+        eyebrow="Browse"
+        title="Categories"
+        description="Pick a vibe and dive in — every category curated by hand."
+      />
+
+      <div className="container-page py-12">
+        {categories.length === 0 ? (
+          <Reveal>
+            <div className="rounded-3xl border border-dashed border-border/60 bg-card/30 p-16 text-center">
+              <p className="font-medium">No categories in your Sanity dataset.</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Create some <code className="rounded bg-secondary/60 px-1.5 py-0.5 text-xs">Products</code> documents in Sanity Studio to populate this page.
+              </p>
+            </div>
+          </Reveal>
+        ) : (
+          <Stagger className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {categories.map((c) => (
+              <MotionItem key={c._id} variants={staggerItem}>
+                <CategoryTile category={c} />
+              </MotionItem>
+            ))}
+          </Stagger>
+        )}
       </div>
-      <div className="p-6">
-        <h1 className="text-2xl font-bold text-center mb-6">Ecommerce Items</h1>
-        <div className="text-center text-gray-500 mb-6">
-          {data.length} Product Categories
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {data.map((val: Product) => (
-            <Link
-              key={val._id}
-              href="/shop"
-              passHref
-            >
-              <div className="group block border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div className="bg-gray-100 aspect-w-1 aspect-h-1 w-full">
-                  <Image
-                    src={urlFor(val.ProductCategoryImage).url()}
-                    alt={val.ProductCategory}
-                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                    width={250}
-                    height={183}
-                  />
-                </div>
-                <div className="p-4">
-                  <h2 className="font-semibold text-lg text-gray-800">
-                    {val.ProductCategory}
-                  </h2>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious href="/" />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="/">1</PaginationLink>
-            <PaginationLink href="/products">2</PaginationLink>
-            <PaginationLink href="/blog">3</PaginationLink>
-            <PaginationLink href="/contact">4</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href="/blog" />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-      <Bottom1 />
-      <Foot />
-    </div>
+    </>
   );
 }
