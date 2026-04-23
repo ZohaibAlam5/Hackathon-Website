@@ -129,11 +129,11 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 sm:gap-1">
           <button
             aria-label="Search"
             onClick={() => setSearchOpen((v) => !v)}
-            className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground"
+            className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground sm:h-10 sm:w-10"
           >
             <Search className="h-5 w-5" />
           </button>
@@ -143,7 +143,7 @@ export function SiteHeader() {
           <Link
             href="/wishlist"
             aria-label="Wishlist"
-            className="relative grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground"
+            className="relative grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground sm:h-10 sm:w-10"
           >
             <Heart className="h-5 w-5" />
             {wishlistHydrated && wishlistCount > 0 && (
@@ -154,7 +154,7 @@ export function SiteHeader() {
           <Link
             href="/cart"
             aria-label="Cart"
-            className="relative grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground"
+            className="relative grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground sm:h-10 sm:w-10"
           >
             <ShoppingBag className="h-5 w-5" />
             {cartHydrated && cartCount > 0 && <Badge>{cartCount}</Badge>}
@@ -164,7 +164,7 @@ export function SiteHeader() {
             <button
               aria-label="Account"
               onClick={() => setAccountOpen((v) => !v)}
-              className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground"
+              className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground sm:h-10 sm:w-10"
             >
               <User className="h-5 w-5" />
             </button>
@@ -218,7 +218,7 @@ export function SiteHeader() {
           <button
             aria-label="Open menu"
             onClick={() => setMobileOpen((v) => !v)}
-            className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground lg:hidden"
+            className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground sm:h-10 sm:w-10 lg:hidden"
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>

@@ -46,7 +46,7 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
         aria-label={`Switch theme (currently ${label})`}
         title={label}
         onClick={() => setTheme(next[current])}
-        className="relative grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground"
+        className="relative grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground sm:h-10 sm:w-10"
         suppressHydrationWarning
       >
         <AnimatePresence mode="wait" initial={false}>
